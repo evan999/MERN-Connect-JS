@@ -228,6 +228,7 @@ router.put(
 
 router.delete('/experience/:exp_id', auth, async (req, res) => {
   try {
+    console.log('deleting experience...');
     const profile = await Profile.findOne({ user: req.user.id });
 
     const removeIndex = profile.experience
@@ -237,6 +238,7 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
     profile.experience.splice(removeIndex, 1);
 
     await profile.save();
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -314,6 +316,7 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
     profile.education.splice(removeIndex, 1);
 
     await profile.save();
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -323,11 +326,13 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
 router.get('/github/:username', (req, res) => {
   try {
     const options = {
-      uri: `https://api.github.com/users/${
-        req.params.username
-      }/repos?per_page=5&sort=created:asc&client_id=${config.get(
-        'githubClientId'
-      )}client_secret=${config.get('githubSecret')}`,
+      uri: encodeURI(
+        `https://api.github.com/users/${
+          req.params.username
+        }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+          'githubClientId'
+        )}&client_secret=${config.get('githubSecret')}`
+      ),
       method: 'GET',
       headers: { 'user-agent': 'node.js' }
     };
@@ -336,10 +341,11 @@ router.get('/github/:username', (req, res) => {
       if (error) console.error(error);
 
       if (response.statusCode !== 200) {
-        res.status(404).json({ msg: 'No Github profile found' });
-
-        res.json(JSON.parse(body));
+        return res.status(404).json({
+          msg: 'Sorry, no Github profile found for this user'
+        });
       }
+      res.json(JSON.parse(body));
     });
   } catch (err) {
     console.error(err.message);
