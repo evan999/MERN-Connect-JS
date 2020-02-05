@@ -39,7 +39,7 @@ router.post(
       const post = await newPost.save();
 
       res.json(post);
-    } catch (error) {
+    } catch (err) {
       console.error(err.message);
       res.status(500).send('Server error');
     }
@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
   try {
     const posts = await Post.find().sort({ date: -1 });
     res.json(posts);
-  } catch (error) {
+  } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
@@ -178,7 +178,7 @@ router.post(
       await post.save();
 
       res.json(post.comments);
-    } catch (error) {
+    } catch (err) {
       console.error(err.message);
       res.status(500).send('Server error');
     }
